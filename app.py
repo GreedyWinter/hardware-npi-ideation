@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+
 import gradio as gr
 
 from hardware_npi_ideation.export import package_to_markdown
@@ -105,4 +107,8 @@ with gr.Blocks(title="Hardware NPI Ideation") as demo:
 
 
 if __name__ == "__main__":
-    demo.launch(theme=gr.themes.Soft())
+    demo.launch(
+        server_name="0.0.0.0",
+        server_port=int(os.environ.get("PORT", "7860")),
+        theme=gr.themes.Soft(),
+    )
