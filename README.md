@@ -24,6 +24,8 @@ The submission is focused on a practical enterprise workflow: improving early pl
 
 The demo is a Gradio application. It is designed for public deployment on Google Cloud Run.
 
+**Live demo:** https://hardware-npi-ideation-4egn3vmo3q-uc.a.run.app/
+
 The demo lets a user enter an early hardware product idea and optional constraints, such as:
 
 - target user or customer segment
@@ -66,7 +68,7 @@ copy .env.example .env
 python app.py
 ```
 
-Set `GEMINI_API_KEY` in your environment or `.env` when you want Gemini-backed structured package generation. See [docs/deployment.md](docs/deployment.md) for the Cloud Run deployment checklist.
+Set `GEMINI_API_KEY` in your environment or `.env` when you want Gemini-backed structured package generation. See [docs/deployment.md](docs/deployment.md) for the public demo deployment checklist.
 
 ## MCP-Compatible Knowledge Server
 
@@ -171,20 +173,19 @@ The implementation is scoped to demonstrate at least these concepts:
 Current version includes:
 
 - Gradio interactive app
-- Cloud Run Dockerfile
 - multi-agent workflow classes
 - Gemini structured JSON generation for the full NPI package
 - MCP-compatible NPI knowledge server
 - optional Gemini client
 - secret redaction and safe export messaging
 - sample hardware NPI scenario
+- public Google Cloud Run deployment
 
 Next steps:
 
-1. deploy the public Gradio app to Cloud Run
-2. add the public demo URL to this README
-3. capture screenshots from the deployed app
-4. finalize Kaggle writeup and demo video
+1. capture screenshots from the deployed app
+2. finalize Kaggle writeup and demo video
+3. add any final Kaggle media gallery assets
 
 ## License
 
