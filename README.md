@@ -20,9 +20,9 @@ This repository supports the Kaggle **AI Agents: Intensive Vibe Coding Capstone 
 
 The submission is focused on a practical enterprise workflow: improving early planning quality for hardware development programs.
 
-## V1 Interactive Demo
+## V2 Interactive Demo
 
-The first version is a Gradio application. It is suitable for a public Hugging Face Space or a similar free demo host.
+The demo is a Gradio application. It is suitable for a public Hugging Face Space or a similar free demo host.
 
 The demo lets a user enter an early hardware product idea and optional constraints, such as:
 
@@ -44,15 +44,17 @@ The system then generates an NPI ideation package containing:
 - high-level NPI timeline
 - exportable Markdown summary
 
-## Gemini Model Path
+## Gemini Structured Generation Path
 
-V1 uses Gemini when `GEMINI_API_KEY` is available. The default model is:
+The app uses Gemini when `GEMINI_API_KEY` is available. Gemini is asked to generate the full NPI ideation package as structured JSON, including requirements, definitions, risks, and timeline. The response is parsed into typed Python dataclasses before being displayed in the UI.
+
+The default model is:
 
 ```text
 gemini-2.5-flash
 ```
 
-The model can be changed with `GEMINI_MODEL`. The app also includes deterministic fallback behavior so the demo remains usable without an API key.
+The model can be changed with `GEMINI_MODEL`. The app also includes deterministic fallback agents so the demo remains usable without an API key.
 
 ## Run Locally
 
@@ -64,9 +66,26 @@ copy .env.example .env
 python app.py
 ```
 
-Set `GEMINI_API_KEY` in your environment or `.env` when you want Gemini-backed question generation.
+Set `GEMINI_API_KEY` in your environment or `.env` when you want Gemini-backed structured package generation. See [docs/deployment.md](docs/deployment.md) for the public demo deployment checklist.
 
-## Planned Architecture
+## MCP-Compatible Knowledge Server
+
+The project includes a real MCP-compatible server entrypoint:
+
+```bash
+python mcp_server.py
+```
+
+It exposes these tools through FastMCP:
+
+- `get_npi_phases`
+- `get_requirement_taxonomy`
+- `common_ambiguous_terms`
+- `lookup_definition`
+
+The Gradio app uses the same NPI knowledge layer in process for reliability, while `mcp_server.py` demonstrates how the domain knowledge can be exposed to external agents or MCP-compatible clients.
+
+## Architecture
 
 The solution is organized around a small multi-agent system and a reusable NPI knowledge tool layer.
 
@@ -79,7 +98,7 @@ User
      -> NPI Risk Agent
      -> Timeline Planning Agent
      -> Report Export Agent
-  -> MCP-style NPI Knowledge Server
+  -> MCP-compatible NPI Knowledge Server
   -> Security and Privacy Guardrails
   -> NPI Ideation Package
 ```
@@ -106,9 +125,16 @@ Maps requirements and risks into a high-level NPI timeline with phases such as C
 
 Consolidates the workflow output into a judge-friendly and stakeholder-friendly package.
 
-## MCP-Style Knowledge Layer
+More detail is available in [docs/architecture.md](docs/architecture.md).
 
-The project includes a tool layer inspired by MCP concepts. This layer exposes structured hardware NPI knowledge to the agents, such as:
+## Media and Demo Assets
+
+- Architecture image/source: [assets/media/hardware-npi-architecture-media-gallery.svg](assets/media/hardware-npi-architecture-media-gallery.svg)
+- Five-minute demo script: [docs/demo_script.md](docs/demo_script.md)
+
+## NPI Knowledge Layer
+
+The project includes a tool layer that exposes structured hardware NPI knowledge to the agents, such as:
 
 - NPI phase definitions
 - requirement taxonomy
@@ -133,19 +159,21 @@ Hardware planning data can contain confidential product, customer, supplier, or 
 
 The implementation is scoped to demonstrate at least these concepts:
 
-- multi-agent system
-- MCP-style tool server
+- Gemini structured output generation
+- multi-agent fallback system
+- MCP-compatible tool server
 - security and privacy guardrails
 - deployable public interactive demo
 - documented agent-assisted development workflow
 
 ## Project Status
 
-V1 includes:
+Current version includes:
 
 - Gradio interactive app
 - multi-agent workflow classes
-- MCP-style local NPI knowledge server
+- Gemini structured JSON generation for the full NPI package
+- MCP-compatible NPI knowledge server
 - optional Gemini client
 - secret redaction and safe export messaging
 - sample hardware NPI scenario
@@ -153,8 +181,8 @@ V1 includes:
 Next steps:
 
 1. deploy the public Gradio app
-2. add richer Gemini-backed structured generation
-3. add architecture media assets to the repo
+2. add the public demo URL to this README
+3. capture screenshots from the deployed app
 4. finalize Kaggle writeup and demo video
 
 ## License
