@@ -33,7 +33,7 @@ def analyze(
     return questions, generation + "\n\n" + requirements, definitions, risks, timeline, security + "\n\n" + markdown
 
 
-with gr.Blocks(title="Hardware NPI Ideation", theme=gr.themes.Soft()) as demo:
+with gr.Blocks(title="Hardware NPI Ideation") as demo:
     gr.Markdown(
         """
         # Hardware NPI Ideation
@@ -105,4 +105,4 @@ with gr.Blocks(title="Hardware NPI Ideation", theme=gr.themes.Soft()) as demo:
 
 
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(theme=gr.themes.Soft())
