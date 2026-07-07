@@ -20,9 +20,11 @@ This repository supports the Kaggle **AI Agents: Intensive Vibe Coding Capstone 
 
 The submission is focused on a practical enterprise workflow: improving early planning quality for hardware development programs.
 
-## Intended Interactive Demo
+## V1 Interactive Demo
 
-The public demo will let a user enter an early hardware product idea and optional constraints, such as:
+The first version is a Gradio application. It is suitable for a public Hugging Face Space or a similar free demo host.
+
+The demo lets a user enter an early hardware product idea and optional constraints, such as:
 
 - target user or customer segment
 - operating environment
@@ -33,16 +35,36 @@ The public demo will let a user enter an early hardware product idea and optiona
 - launch timing
 - compliance or certification needs
 
-The system will then generate an NPI ideation package containing:
+The system then generates an NPI ideation package containing:
 
 - clarifying questions
 - structured requirement brief
 - definitions and assumptions
 - early risk register
 - high-level NPI timeline
-- exportable Markdown or JSON summary
+- exportable Markdown summary
 
-The demo is intended to be publicly accessible for judges and reviewers. Local setup instructions will also be provided as the implementation matures.
+## Gemini Model Path
+
+V1 uses Gemini when `GEMINI_API_KEY` is available. The default model is:
+
+```text
+gemini-2.5-flash
+```
+
+The model can be changed with `GEMINI_MODEL`. The app also includes deterministic fallback behavior so the demo remains usable without an API key.
+
+## Run Locally
+
+```bash
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+copy .env.example .env
+python app.py
+```
+
+Set `GEMINI_API_KEY` in your environment or `.env` when you want Gemini-backed question generation.
 
 ## Planned Architecture
 
@@ -86,7 +108,7 @@ Consolidates the workflow output into a judge-friendly and stakeholder-friendly 
 
 ## MCP-Style Knowledge Layer
 
-The project will include a tool layer inspired by MCP concepts. This layer will expose structured hardware NPI knowledge to the agents, such as:
+The project includes a tool layer inspired by MCP concepts. This layer exposes structured hardware NPI knowledge to the agents, such as:
 
 - NPI phase definitions
 - requirement taxonomy
@@ -99,7 +121,7 @@ This keeps domain knowledge explicit and reusable instead of hiding it entirely 
 
 ## Security and Privacy Intent
 
-Hardware planning data can contain confidential product, customer, supplier, or cost information. The demo will include lightweight guardrails that:
+Hardware planning data can contain confidential product, customer, supplier, or cost information. The demo includes lightweight guardrails that:
 
 - warn users not to paste confidential information
 - detect and redact API-key-like or secret-like strings
@@ -119,15 +141,21 @@ The implementation is scoped to demonstrate at least these concepts:
 
 ## Project Status
 
-This repository is starting with the project intent and architecture direction. Implementation will follow in small, reviewable steps:
+V1 includes:
 
-1. scaffold the interactive application
-2. add the NPI knowledge layer
-3. implement the agent orchestration workflow
-4. add security checks and export review
-5. create sample scenarios for the demo
-6. deploy the public interactive demo
-7. finalize Kaggle writeup and media gallery assets
+- Gradio interactive app
+- multi-agent workflow classes
+- MCP-style local NPI knowledge server
+- optional Gemini client
+- secret redaction and safe export messaging
+- sample hardware NPI scenario
+
+Next steps:
+
+1. deploy the public Gradio app
+2. add richer Gemini-backed structured generation
+3. add architecture media assets to the repo
+4. finalize Kaggle writeup and demo video
 
 ## License
 
