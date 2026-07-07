@@ -39,7 +39,7 @@ with gr.Blocks(title="Hardware NPI Ideation", theme=gr.themes.Soft()) as demo:
         # Hardware NPI Ideation
 
         Agentic requirement gathering, definitions, risk analysis, and timeline planning for hardware NPI.
-        This first version uses a Gemini-backed orchestration path when `GEMINI_API_KEY` is configured and a deterministic demo mode otherwise.
+        The app uses Gemini structured JSON generation when `GEMINI_API_KEY` is configured and deterministic fallback agents otherwise.
         """
     )
 
