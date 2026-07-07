@@ -22,7 +22,7 @@ The submission is focused on a practical enterprise workflow: improving early pl
 
 ## V2 Interactive Demo
 
-The demo is a Gradio application. It is suitable for a public Hugging Face Space or a similar free demo host.
+The demo is a Gradio application. It is designed for public deployment on Google Cloud Run.
 
 The demo lets a user enter an early hardware product idea and optional constraints, such as:
 
@@ -66,7 +66,7 @@ copy .env.example .env
 python app.py
 ```
 
-Set `GEMINI_API_KEY` in your environment or `.env` when you want Gemini-backed structured package generation. See [docs/deployment.md](docs/deployment.md) for the public demo deployment checklist.
+Set `GEMINI_API_KEY` in your environment or `.env` when you want Gemini-backed structured package generation. See [docs/deployment.md](docs/deployment.md) for the Cloud Run deployment checklist.
 
 ## MCP-Compatible Knowledge Server
 
@@ -171,6 +171,7 @@ The implementation is scoped to demonstrate at least these concepts:
 Current version includes:
 
 - Gradio interactive app
+- Cloud Run Dockerfile
 - multi-agent workflow classes
 - Gemini structured JSON generation for the full NPI package
 - MCP-compatible NPI knowledge server
@@ -180,7 +181,7 @@ Current version includes:
 
 Next steps:
 
-1. deploy the public Gradio app
+1. deploy the public Gradio app to Cloud Run
 2. add the public demo URL to this README
 3. capture screenshots from the deployed app
 4. finalize Kaggle writeup and demo video
