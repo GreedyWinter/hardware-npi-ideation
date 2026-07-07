@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Iterator
 
 import gradio as gr
 
@@ -15,14 +16,27 @@ def analyze(
     operating_environment: str,
     known_constraints: str,
     business_goals: str,
-) -> tuple[str, str, str, str, str, str]:
-    package = run_npi_workflow(
-        product_idea=product_idea,
-        target_customer=target_customer,
-        operating_environment=operating_environment,
-        known_constraints=known_constraints,
-        business_goals=business_goals,
-    )
+) -> Iterator[tuple[str, str, str, str, str, str, str]]:
+    status = "Generating the NPI ideation package. This can take 10-30 seconds when Gemini is active..."
+    empty = ""
+    yield status, empty, empty, empty, empty, empty, empty
+
+    try:
+        package = run_npi_workflow(
+            product_idea=product_idea,
+            target_customer=target_customer,
+            operating_environment=operating_environment,
+            known_constraints=known_constraints,
+            business_goals=business_goals,
+        )
+    except Exception as exc:
+        error = (
+            "Generation failed before an NPI package could be created.\n\n"
+            f"Error: `{type(exc).__name__}: {exc}`\n\n"
+            "Try again with the sample scenario, or confirm the deployed service has access to the Gemini API key."
+        )
+        yield "Generation failed.", error, empty, empty, empty, empty, error
+        return
 
     markdown = package_to_markdown(package)
     questions = "\n".join(f"- {item}" for item in package.clarifying_questions)
@@ -32,7 +46,15 @@ def analyze(
     timeline = package.timeline_to_markdown()
     security = package.security_report.to_markdown()
     generation = package.generation_note()
-    return questions, generation + "\n\n" + requirements, definitions, risks, timeline, security + "\n\n" + markdown
+    yield (
+        f"Done. {package.generation_note()}",
+        questions,
+        generation + "\n\n" + requirements,
+        definitions,
+        risks,
+        timeline,
+        security + "\n\n" + markdown,
+    )
 
 
 with gr.Blocks(title="Hardware NPI Ideation") as demo:
@@ -73,6 +95,7 @@ with gr.Blocks(title="Hardware NPI Ideation") as demo:
             run_button = gr.Button("Generate NPI Ideation Package", variant="primary")
 
         with gr.Column(scale=2):
+            status_out = gr.Markdown("Ready. Click **Generate NPI Ideation Package** to run the workflow.")
             with gr.Tab("Clarifying Questions"):
                 questions_out = gr.Markdown()
             with gr.Tab("Requirement Brief"):
@@ -96,6 +119,7 @@ with gr.Blocks(title="Hardware NPI Ideation") as demo:
             business_goals,
         ],
         outputs=[
+            status_out,
             questions_out,
             requirements_out,
             definitions_out,
@@ -104,6 +128,7 @@ with gr.Blocks(title="Hardware NPI Ideation") as demo:
             export_out,
         ],
     )
+    demo.queue(default_concurrency_limit=4)
 
 
 if __name__ == "__main__":
