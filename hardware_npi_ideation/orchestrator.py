@@ -5,6 +5,7 @@ from .gemini_client import GeminiClient
 from .knowledge import NPIKnowledgeServer
 from .models import NPIIdeationPackage
 from .security import sanitize_context
+from .structured_gemini import generate_structured_package
 
 
 def run_npi_workflow(
@@ -26,6 +27,10 @@ def run_npi_workflow(
     knowledge = NPIKnowledgeServer()
     llm = GeminiClient()
 
+    gemini_package = generate_structured_package(context, security_report, knowledge, llm)
+    if gemini_package is not None:
+        return gemini_package
+
     requirements_agent = RequirementsIntakeAgent(knowledge, llm)
     definition_agent = DefinitionAssumptionAgent(knowledge)
     risk_agent = NPIRiskAgent(knowledge)
@@ -44,4 +49,5 @@ def run_npi_workflow(
         risks=risks,
         timeline=timeline,
         security_report=security_report,
+        generation_mode="Deterministic local fallback agents",
     )
