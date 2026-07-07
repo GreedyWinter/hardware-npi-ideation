@@ -29,7 +29,8 @@ def analyze(
     risks = package.risks_to_markdown()
     timeline = package.timeline_to_markdown()
     security = package.security_report.to_markdown()
-    return questions, requirements, definitions, risks, timeline, security + "\n\n" + markdown
+    generation = package.generation_note()
+    return questions, generation + "\n\n" + requirements, definitions, risks, timeline, security + "\n\n" + markdown
 
 
 with gr.Blocks(title="Hardware NPI Ideation", theme=gr.themes.Soft()) as demo:
