@@ -82,6 +82,7 @@ class NPIIdeationPackage:
     risks: list[RiskItem]
     timeline: list[TimelinePhase]
     security_report: SecurityReport
+    generation_mode: str
 
     def risks_to_markdown(self) -> str:
         rows = ["## Risk Register", "| Risk | Phase | Severity | Likelihood | Mitigation |", "|---|---|---|---|---|"]
@@ -98,3 +99,6 @@ class NPIIdeationPackage:
                 f"| {phase.name} | {phase.duration} | {', '.join(phase.activities)} | {phase.gate} |"
             )
         return "\n".join(rows)
+
+    def generation_note(self) -> str:
+        return f"Generated with: **{self.generation_mode}**"
