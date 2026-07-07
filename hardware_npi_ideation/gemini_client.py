@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 import os
+import re
 
 try:
     from dotenv import load_dotenv
@@ -45,3 +47,39 @@ class GeminiClient:
             if len(lines) >= max_lines:
                 break
         return lines
+
+    def generate_json(self, prompt: str) -> dict:
+        if not self.enabled:
+            return {}
+        try:
+            from google import genai
+            from google.genai import types
+
+            client = genai.Client(api_key=self.api_key)
+            response = client.models.generate_content(
+                model=self.model_name,
+                contents=prompt,
+                config=types.GenerateContentConfig(response_mime_type="application/json"),
+            )
+            text = getattr(response, "text", "") or ""
+        except Exception:
+            return {}
+
+        return _parse_json_object(text)
+
+
+def _parse_json_object(text: str) -> dict:
+    cleaned = text.strip()
+    cleaned = re.sub(r"^```(?:json)?", "", cleaned).strip()
+    cleaned = re.sub(r"```$", "", cleaned).strip()
+    try:
+        parsed = json.loads(cleaned)
+    except json.JSONDecodeError:
+        match = re.search(r"\{.*\}", cleaned, re.DOTALL)
+        if not match:
+            return {}
+        try:
+            parsed = json.loads(match.group(0))
+        except json.JSONDecodeError:
+            return {}
+    return parsed if isinstance(parsed, dict) else {}
