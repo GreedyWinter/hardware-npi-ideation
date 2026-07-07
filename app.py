@@ -2,12 +2,111 @@ from __future__ import annotations
 
 import os
 from collections.abc import Iterator
+from html import escape
 
 import gradio as gr
 
 from hardware_npi_ideation.export import package_to_markdown
 from hardware_npi_ideation.orchestrator import run_npi_workflow
 from hardware_npi_ideation.samples import DEMO_SCENARIO
+
+
+APP_CSS = """
+.status-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 48px;
+    padding: 12px 14px;
+    border: 1px solid #d7dde8;
+    border-radius: 8px;
+    background: #f8fafc;
+    color: #1f2937;
+    font-size: 15px;
+}
+.status-card strong {
+    display: block;
+    font-weight: 700;
+}
+.status-card span {
+    display: block;
+    color: #4b5563;
+    font-size: 13px;
+    margin-top: 2px;
+}
+.status-spinner {
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+    border: 3px solid #cbd5e1;
+    border-top-color: #2563eb;
+    border-radius: 999px;
+    animation: npi-spin 0.85s linear infinite;
+}
+.status-dot {
+    width: 22px;
+    height: 22px;
+    flex: 0 0 22px;
+    border-radius: 999px;
+    background: #16a34a;
+    box-shadow: inset 0 0 0 6px #dcfce7;
+}
+.status-error .status-dot {
+    background: #dc2626;
+    box-shadow: inset 0 0 0 6px #fee2e2;
+}
+@keyframes npi-spin {
+    to { transform: rotate(360deg); }
+}
+"""
+
+
+def status_ready() -> str:
+    return """
+    <div class="status-card">
+        <div class="status-dot"></div>
+        <div>
+            <strong>Ready</strong>
+            <span>Click Generate NPI Ideation Package to run the workflow.</span>
+        </div>
+    </div>
+    """
+
+
+def status_loading() -> str:
+    return """
+    <div class="status-card">
+        <div class="status-spinner" aria-hidden="true"></div>
+        <div>
+            <strong>Generating NPI ideation package</strong>
+            <span>Click received. Gemini-backed generation can take 10-30 seconds.</span>
+        </div>
+    </div>
+    """
+
+
+def status_done(generation_note: str) -> str:
+    return f"""
+    <div class="status-card">
+        <div class="status-dot"></div>
+        <div>
+            <strong>Generation complete</strong>
+            <span>{escape(generation_note)}</span>
+        </div>
+    </div>
+    """
+
+
+def status_error(error_message: str) -> str:
+    return f"""
+    <div class="status-card status-error">
+        <div class="status-dot"></div>
+        <div>
+            <strong>Generation failed</strong>
+            <span>{escape(error_message)}</span>
+        </div>
+    </div>
+    """
 
 
 def analyze(
@@ -17,9 +116,8 @@ def analyze(
     known_constraints: str,
     business_goals: str,
 ) -> Iterator[tuple[str, str, str, str, str, str, str]]:
-    status = "Generating the NPI ideation package. This can take 10-30 seconds when Gemini is active..."
     empty = ""
-    yield status, empty, empty, empty, empty, empty, empty
+    yield status_loading(), empty, empty, empty, empty, empty, empty
 
     try:
         package = run_npi_workflow(
@@ -30,12 +128,13 @@ def analyze(
             business_goals=business_goals,
         )
     except Exception as exc:
+        error_message = f"{type(exc).__name__}: {exc}"
         error = (
             "Generation failed before an NPI package could be created.\n\n"
-            f"Error: `{type(exc).__name__}: {exc}`\n\n"
+            f"Error: `{error_message}`\n\n"
             "Try again with the sample scenario, or confirm the deployed service has access to the Gemini API key."
         )
-        yield "Generation failed.", error, empty, empty, empty, empty, error
+        yield status_error(error_message), error, empty, empty, empty, empty, error
         return
 
     markdown = package_to_markdown(package)
@@ -47,7 +146,7 @@ def analyze(
     security = package.security_report.to_markdown()
     generation = package.generation_note()
     yield (
-        f"Done. {package.generation_note()}",
+        status_done(package.generation_note()),
         questions,
         generation + "\n\n" + requirements,
         definitions,
@@ -95,7 +194,7 @@ with gr.Blocks(title="Hardware NPI Ideation") as demo:
             run_button = gr.Button("Generate NPI Ideation Package", variant="primary")
 
         with gr.Column(scale=2):
-            status_out = gr.Markdown("Ready. Click **Generate NPI Ideation Package** to run the workflow.")
+            status_out = gr.HTML(status_ready())
             with gr.Tab("Clarifying Questions"):
                 questions_out = gr.Markdown()
             with gr.Tab("Requirement Brief"):
@@ -136,4 +235,5 @@ if __name__ == "__main__":
         server_name="0.0.0.0",
         server_port=int(os.environ.get("PORT", "7860")),
         theme=gr.themes.Soft(),
+        css=APP_CSS,
     )
